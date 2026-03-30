@@ -20,6 +20,21 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "fakeredis>=2.23.0",
     "httpx>=0.28.1",
     "pytest>=9.0.2",
+    "ruff>=0.11.0",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# FastAPI injects dependencies via Depends() in parameter defaults (idiomatic).
+ignore = ["B008"]
+
+[tool.ruff.format]
+quote-style = "double"

@@ -1,17 +1,17 @@
 import os
+
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+os.environ["PYTEST_USE_FAKE_REDIS"] = "1"
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
-
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 
 # Ensure models are imported before create_all
-from app.models.user import User
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 test_engine = create_engine(
     "sqlite:///./test.db",
@@ -24,12 +24,14 @@ TestingSessionLocal = sessionmaker(
     bind=test_engine,
 )
 
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 @pytest.fixture(scope="function")
 def client():
