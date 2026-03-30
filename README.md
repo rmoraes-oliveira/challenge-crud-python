@@ -158,3 +158,29 @@ O servidor estará disponível em: [http://localhost:8000](http://localhost:8000
 Acesse a documentação interativa da API no Swagger:
 - [Swagger UI](http://localhost:8000/docs)
 - [Redoc](http://localhost:8000/redoc)
+
+---
+
+## Seed de dados (`seed_users.py`)
+
+O script **`seed_users.py`** popula o banco com usuários fictícios para testes (listagem paginada, cache, etc.). Ele usa **Faker** com locale **`pt_BR`**, gera **500** registros por padrão — nome aleatório, email único no formato `{username}{índice}@example.com` e idade aleatória entre **18** e **65** — e persiste tudo em uma única transação (`SessionLocal`).
+
+**Pré-requisitos:** schema aplicado (`alembic upgrade head`) e **`DATABASE_URL`** apontando para o mesmo banco usado pela API (Redis não é necessário para rodar o seed).
+
+**Execução local** (na raiz do projeto, com o ambiente já configurado):
+
+```bash
+uv run python seed_users.py
+```
+
+**Com Docker Compose** (stack `app` + `db` no ar; o container `app` já recebe `DATABASE_URL` do serviço Postgres):
+
+```bash
+docker compose exec app uv run python seed_users.py
+```
+
+**Outra quantidade de registros:** a função `seed_users(total=500)` aceita o parâmetro `total`. Por exemplo, no interpretador ou um one-liner:
+
+```bash
+uv run python -c "from seed_users import seed_users; seed_users(100)"
+```
