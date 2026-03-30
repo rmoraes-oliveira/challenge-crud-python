@@ -82,6 +82,51 @@ curl -X GET http://localhost:8000/api/v1/health/db
 
 ## Como Rodar o Projeto
 
+### Com Docker (recomendado para desenvolvimento)
+
+O repositório inclui **`Dockerfile`** e **`docker-compose.yml`** para subir a API junto com **PostgreSQL** e **Redis** sem instalar esses serviços na máquina.
+
+**Serviços:**
+
+| Serviço | Imagem / build | Porta host | Função |
+|--------|-----------------|------------|--------|
+| `app`  | build do `Dockerfile` | `8000` | API FastAPI (Uvicorn com `--reload`) |
+| `db`   | `postgres:16-alpine` | `5432` | Banco `challenge_db` (usuário/senha: `postgres`/`postgres`) |
+| `redis`| `redis:7-alpine`       | `6379` | Cache usado nos endpoints de usuários |
+
+**Variáveis no container da app** (definidas no Compose):
+
+- `DATABASE_URL`: `postgresql://postgres:postgres@db:5432/challenge_db`
+- `REDIS_URL`: `redis://redis:6379/0`
+
+**Subir tudo:**
+
+```bash
+docker compose up --build
+```
+
+Na primeira execução (e após mudanças de migration), o serviço `app` roda `alembic upgrade head` antes do Uvicorn. O diretório do projeto é montado em `/app` para hot-reload.
+
+**API:** [http://localhost:8000](http://localhost:8000) · **Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+**Parar e remover containers** (mantém volumes com dados de Postgres/Redis):
+
+```bash
+docker compose down
+```
+
+Para apagar também os volumes nomeados (`postgres_data`, `redis_data`):
+
+```bash
+docker compose down -v
+```
+
+**Só a imagem da API (sem Compose):** o `Dockerfile` expõe a porta `8000` e usa `uv run uvicorn`; para funcionar é preciso fornecer `DATABASE_URL` e `REDIS_URL` apontando para instâncias acessíveis (por exemplo, rede Docker ou host).
+
+---
+
+### Execução local (sem Docker)
+
 ### 1. Configurar o Ambiente Virtual
 Certifique-se de que o ambiente virtual está ativado:
 ```bash
